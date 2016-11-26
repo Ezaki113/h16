@@ -9,6 +9,7 @@ var routes = Routes()
 
 
 let KEY = "Rqhweg12u387jGHhasd621t".utf8.map({$0})
+let CIPHER = try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())
 
 var rooms: [Int : ChatRoomHandler] = [:]
 
@@ -60,9 +61,8 @@ routes.add(method: .get, uri: "/", handler: {
         "photoUrl": photoUrl
     ].jsonEncodedString()
 
-    let encryptedCookie = try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())
-            .encrypt(cookie.utf8.map({$0}))
-            .toHexString()
+    let encryptedCookie = try! CIPHER.encrypt(cookie.utf8.map({$0}))
+            .toBase64()!
 
     response.addCookie(HTTPCookie(
         name: "session",

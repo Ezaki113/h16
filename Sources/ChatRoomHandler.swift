@@ -44,9 +44,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
         let session: String? = request.cookie(name: "session")
 
         if (session != nil) {
-            let decrypted = String(bytes: try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())
-                    .decrypt(session!.utf8.map({$0})), encoding: .utf8)
-
+            let decrypted = try! session!.decryptBase64ToString(cipher: CIPHER)
 
             print(decrypted)
         }
