@@ -67,8 +67,8 @@ routes.add(method: .get, uri: "/", handler: {
         name: "session",
         value: encryptedCookie,
         domain: "team10.vkhackathon.ru",
-        path: "/",
         expires: .relativeSeconds(60),
+        path: "/",
         secure: false,
         httpOnly: false
     ))
