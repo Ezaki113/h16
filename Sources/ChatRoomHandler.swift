@@ -29,7 +29,15 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
     func handleSession(request: HTTPRequest, socket: WebSocket) {
         guard
-            let hash = request.urlVariables[routeTrailingWildcardKey],
+            var hash = request.urlVariables[routeTrailingWildcardKey] else {
+            socket.close()
+
+            return
+        }
+
+        hash.remove(at: hash.startIndex)
+
+        guard
             let cipher = try? Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7()),
             let decrypted = try? hash.decryptBase64ToString(cipher: cipher).jsonDecode() as! [String: Any],
             let viewerId = decrypted["userId"] as? Int,
