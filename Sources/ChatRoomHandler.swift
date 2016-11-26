@@ -49,17 +49,27 @@ class ChatRoomHandler: WebSocketSessionHandler {
             return
         }
 
-        let decrypted = try! session!.decryptBase64ToString(cipher: try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())).jsonDecode() as! [String : Any]
+        do {
+            let decrypted = try session!.decryptBase64ToString(cipher: try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())).jsonDecode() as! [String: Any]
 
-        let viewerId = decrypted["userId"] as! Int
-        let name = decrypted["name"] as! String
-        let photoUrl = decrypted["photoUrl"] as! String
 
-        addMemberIfNotExists(id: viewerId, name: name, photoUrl: photoUrl)
+            let viewerId = decrypted["userId"] as! Int
+            let name = decrypted["name"] as! String
+            let photoUrl = decrypted["photoUrl"] as! String
 
-        let member = members[viewerId]!
-        let socketId = member.append(socket: socket)
-        work(socketId: socketId, member: member, request: request, socket: socket)
+            addMemberIfNotExists(id: viewerId, name: name, photoUrl: photoUrl)
+
+            let member = members[viewerId]!
+            let socketId = member.append(socket: socket)
+
+
+
+            work(socketId: socketId, member: member, request: request, socket: socket)
+        } catch {
+            print(error)
+        }
+
+
     }
 
     func work(socketId: Int, member: ChatMember, request: HTTPRequest, socket: WebSocket)
