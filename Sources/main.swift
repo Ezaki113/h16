@@ -34,8 +34,19 @@ routes.add(method: .get, uri: "/", handler: {
     guard
         let groupId =  Int(request.param(name: "group_id") ?? ""),
         let viewerId = Int(request.param(name: "viewer_id") ?? ""),
-        let apiResult = request.param(name: "api_result"),
-        let decoded = try? apiResult.jsonDecode() as? [String : Any],
+        let apiResult = request.param(name: "api_result") else
+    {
+        response.status = .badRequest
+        response.completed()
+
+        print(3)
+
+        return
+    }
+
+    print(1)
+
+    guard let decoded = try? apiResult.jsonDecode() as? [String : Any],
         let decodedResponse = (decoded!["response"] as! [Any]).first as? [String: Any],
         let firstName = decodedResponse["first_name"] as? String,
         let lastName = decodedResponse["last_name"] as? String,
@@ -50,6 +61,8 @@ routes.add(method: .get, uri: "/", handler: {
     else {
         response.status = .badRequest
         response.completed()
+
+        print(2)
 
         return
     }
