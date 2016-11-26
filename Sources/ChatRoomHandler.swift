@@ -31,14 +31,8 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
         let viewerId: Int = Int(request.urlVariables["viewer_id"]!)!
 
-        print(1)
-
         let member = members[viewerId]!
-
-        print(2)
         let socketId = member.append(socket: socket)
-
-        print(3)
         work(socketId: socketId, member: member, request: request, socket: socket)
     }
 
@@ -52,14 +46,10 @@ class ChatRoomHandler: WebSocketSessionHandler {
             }
 
             guard socket.isConnected, let string = string else {
-                print("Attempt to close")
                 member.close(socketId: socketId)
 
                 return
             }
-
-            print("Attempt to parse")
-
             guard
                     let inMessage = try? string.jsonDecode() as? [String : [String : String]],
                     let body = inMessage?["sendMessage"]
@@ -78,8 +68,6 @@ class ChatRoomHandler: WebSocketSessionHandler {
                 return
             }
 
-            print("Read msg: \(string) op: \(op) fin: \(fin)")
-
             let message: [String : [String: Any]] = [
                 "message": [
                     "userId": member.id,
@@ -90,11 +78,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
                 ]
             ]
 
-            print("Attempt to send")
-
             for (_, emember) in self.members {
-                print(emember.sockets.count)
-
                 emember.sendStringMessage(string: try! message.jsonEncodedString(), final: true, completion: {})
             }
 

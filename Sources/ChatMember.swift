@@ -29,8 +29,6 @@ class ChatMember {
 
     func close(socketId: Int)
     {
-        print("Close \(socketId)")
-
         guard let socket = sockets[socketId] else {
             return
         }
@@ -50,8 +48,6 @@ class ChatMember {
         sockets.filter {
             return $0 != nil && $0!.isConnected
         }.map {
-            print("Send to \(self.id)")
-
             $0!.sendStringMessage(string: string, final: final, completion: completion)
         }
     }
