@@ -8,7 +8,7 @@ let server = HTTPServer()
 var routes = Routes()
 
 
-let KEY = "Rqhweg12u387jGHhasd621t"
+let KEY = "Rqhweg12u387jGHhasd621t".utf8.map({$0})
 
 var rooms: [Int : ChatRoomHandler] = [:]
 
@@ -60,7 +60,7 @@ routes.add(method: .get, uri: "/", handler: {
         "photoUrl": photoUrl
     ].jsonEncodedString()
 
-    let encryptedCookie = try! Blowfish(key: KEY.utf8.map({$0}), blockMode: .CBC, padding: PKCS7())
+    let encryptedCookie = try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())
             .encrypt(cookie.utf8.map({$0}))
             .toHexString()
 

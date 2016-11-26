@@ -2,6 +2,18 @@ import PerfectLib
 import PerfectWebSockets
 import PerfectHTTP
 import PerfectHTTPServer
+import CryptoSwift
+
+extension HTTPRequest {
+    func cookie(name: String) -> String? {
+        for (cookieName, value) in self.cookies {
+            if (cookieName == name) {
+                return value
+            }
+        }
+        return nil
+    }
+}
 
 class ChatRoomHandler: WebSocketSessionHandler {
     let socketProtocol: String? = nil
@@ -28,7 +40,17 @@ class ChatRoomHandler: WebSocketSessionHandler {
     }
 
     func handleSession(request: HTTPRequest, socket: WebSocket) {
-        print(request.cookies)
+
+        let session: String? = request.cookie(name: "session")
+
+        if (session != nil) {
+            let decrypted = String(bytes: try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())
+                    .decrypt(session!.utf8.map({$0})), encoding: .utf8)
+
+
+            print(decrypted)
+        }
+
 
 
         let viewerId: Int = Int(request.urlVariables["viewer_id"]!)!
