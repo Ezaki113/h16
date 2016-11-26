@@ -77,8 +77,6 @@ routes.add(method: .get, uri: "/", handler: {
         rooms[groupId!] = room
     }
 
-    room!.addMemberIfNotExists(id: viewerId, name: "\(firstName) \(lastName)", photoUrl: photoUrl)
-
 //    let script = "var socket = new WebSocket(\"ws://\" + location.host + \"/ws/\(groupId!)/\(viewerId)\");"
 //            + "socket.onopen = function() {console.log(1); socket.send(JSON.stringify({\"sendMessage\":{\"text\":\"kokoko\"}}));};"
 //            + "socket.onmessage = function(e) {console.log(event.data)};"

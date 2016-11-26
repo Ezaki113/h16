@@ -41,17 +41,21 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
     func handleSession(request: HTTPRequest, socket: WebSocket) {
 
-        let session: String? = request.cookie(name: "session")
+        let session = request.cookie(name: "session")
 
-        if (session != nil) {
-            let decrypted = try! session!.decryptBase64ToString(cipher: CIPHER)
+        guard session != nil else {
+            socket.close()
 
-            print(decrypted)
+            return
         }
 
+        let decrypted = try! session!.decryptBase64ToString(cipher: CIPHER).jsonDecode() as! [String : Any]
 
+        let viewerId = decrypted["userId"] as! Int
+        let name = decrypted["name"] as! String
+        let photoUrl = decrypted["name"] as! String
 
-        let viewerId: Int = Int(request.urlVariables["viewer_id"]!)!
+        addMemberIfNotExists(id: viewerId, name: name, photoUrl: photoUrl)
 
         let member = members[viewerId]!
         let socketId = member.append(socket: socket)
