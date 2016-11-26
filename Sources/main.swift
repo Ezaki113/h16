@@ -12,29 +12,29 @@ let KEY = "Rqhweg12u387jGHhasd621t".utf8.map({$0})
 
 var rooms: [Int : ChatRoomHandler] = [:]
 
-routes.add(method: .get, uri: "/", handler: {
+let mainHandler: RequestHandler = {
     request, response in
-    
+
 //    guard let sign = request.param(name: "sign") else {
 //        response.status = .badRequest
 //        response.completed()
-//        
+//
 //        return
 //    }
-//    
+//
 //    var signa = ""
 
 //    for (key, value) in request.queryParams {
 //        if key == "hash" || key == "sign" { continue }
 //        signa += value
 //    }
-    
+
 //    let x = try? HMAC(key: SECRET.utf8.map({$0}), variant: .sha256).authenticate(signa.utf8.map({$0}))
 
     guard
-        let groupId =  Int(request.param(name: "group_id") ?? ""),
-        let viewerId = Int(request.param(name: "viewer_id") ?? ""),
-        let apiResult = request.param(name: "api_result") else
+            let groupId =  Int(request.param(name: "group_id") ?? ""),
+            let viewerId = Int(request.param(name: "viewer_id") ?? ""),
+            let apiResult = request.param(name: "api_result") else
     {
         response.status = .badRequest
         response.completed()
@@ -43,18 +43,18 @@ routes.add(method: .get, uri: "/", handler: {
     }
 
     guard let decoded = try? apiResult.jsonDecode() as? [String : Any],
-        let decodedResponse = (decoded!["response"] as! [Any]).first as? [String: Any],
-        let firstName = decodedResponse["first_name"] as? String,
-        let lastName = decodedResponse["last_name"] as? String,
-        let photoUrl = decodedResponse["photo_200"] as? String,
-        let cipher: Blowfish = try? Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7()),
-        let hash: String = try? cipher.encrypt(
-           try! [
-               "userId": viewerId,
-               "name": "\(firstName) \(lastName)",
-               "photoUrl": photoUrl
-           ].jsonEncodedString().utf8.map({$0})).toBase64()!
-    else {
+          let decodedResponse = (decoded!["response"] as! [Any]).first as? [String: Any],
+          let firstName = decodedResponse["first_name"] as? String,
+          let lastName = decodedResponse["last_name"] as? String,
+          let photoUrl = decodedResponse["photo_200"] as? String,
+          let cipher: Blowfish = try? Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7()),
+          let hash: String = try? cipher.encrypt(
+                          try! [
+                                  "userId": viewerId,
+                                  "name": "\(firstName) \(lastName)",
+                                  "photoUrl": photoUrl
+                          ].jsonEncodedString().utf8.map({$0})).toBase64()!
+            else {
         response.status = .badRequest
         response.completed()
 
@@ -76,8 +76,10 @@ routes.add(method: .get, uri: "/", handler: {
     response.setHeader(.contentType, value: "text/html")
     response.appendBody(string: body)
     response.completed()
-  }
-)
+}
+
+routes.add(method: .get, uri: "/", handler: mainHandler)
+routes.add(method: .get, uri: "/mobile", handler: mainHandler)
 
 routes.add(method: .get, uri: "/ws/{group_id}/**", handler: {
     request, response in
