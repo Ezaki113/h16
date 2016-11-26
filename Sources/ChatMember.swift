@@ -8,8 +8,6 @@ class ChatMember {
     var sockets: [WebSocket?] = []
     var socketId: Int = 0
 
-    var lastClose: (() -> ()) = {}
-
     init(id: Int, name: String, photoUrl: String) {
         self.id = id
         self.name = name
@@ -36,16 +34,10 @@ class ChatMember {
         socket.close()
 
         sockets[socketId] = nil
-
-        let opened = sockets.filter { $0 != nil && $0!.isConnected }
-
-        if opened.count == 0 {
-            lastClose()
-        }
     }
 
     func sendStringMessage(string: String, final: Bool, completion: @escaping () -> ()) {
-        sockets.filter {
+        let _ = sockets.filter {
             return $0 != nil && $0!.isConnected
         }.map {
             $0!.sendStringMessage(string: string, final: final, completion: completion)

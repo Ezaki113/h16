@@ -2,6 +2,7 @@ import PerfectLib
 import PerfectWebSockets
 import PerfectHTTP
 import PerfectHTTPServer
+import CryptoSwift
 
 class ChatRoomHandler: WebSocketSessionHandler {
     let socketProtocol: String? = nil
@@ -13,26 +14,41 @@ class ChatRoomHandler: WebSocketSessionHandler {
         self.groupId = groupId
     }
 
-    func addMemberIfNotExists(id: Int, name: String, photoUrl: String)
+    func addMemberIfNotExists(id: Int, name: String, photoUrl: String) -> ChatMember
     {
         var member = members[id]
 
         if member == nil {
             member = ChatMember(id: id, name: name, photoUrl: photoUrl)
 
-            member!.lastClose = {
-//                self.members[id] = nil
-            }
             members[id] = member
         }
+
+        return member!
     }
 
     func handleSession(request: HTTPRequest, socket: WebSocket) {
+        guard
+            let hash = request.urlVariables["hash"],
+            let cipher = try? Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7()),
+            let decrypted = try? hash.decryptBase64ToString(cipher: cipher).jsonDecode() as! [String: Any],
+            let viewerId = decrypted["userId"] as? Int,
+            let name = decrypted["name"] as? String,
+            let photoUrl = decrypted["photoUrl"] as? String
+        else {
+            socket.close()
 
-        let viewerId: Int = Int(request.urlVariables["viewer_id"]!)!
+            return
+        }
 
-        let member = members[viewerId]!
+        let member = addMemberIfNotExists(
+            id: viewerId,
+            name: name,
+            photoUrl: photoUrl
+        )
+
         let socketId = member.append(socket: socket)
+
         work(socketId: socketId, member: member, request: request, socket: socket)
     }
 
@@ -41,22 +57,19 @@ class ChatRoomHandler: WebSocketSessionHandler {
         socket.readStringMessage {
             string, op, fin in
 
-            func skip() {
-                self.work(socketId: socketId, member: member, request: request, socket: socket)
-            }
-
             guard let string = string else {
                 print("Reason string = string")
                 member.close(socketId: socketId)
 
                 return
             }
-            guard
-                    let inMessage = try? string.jsonDecode() as? [String : [String : String]],
-                    let body = inMessage?["sendMessage"]
-            else {
-                skip()
 
+            defer { self.work(socketId: socketId, member: member, request: request, socket: socket) }
+
+            guard
+                let inMessage = try? string.jsonDecode() as? [String : [String : String]],
+                let body = inMessage?["sendMessage"]
+            else {
                 return
             }
 
@@ -64,8 +77,6 @@ class ChatRoomHandler: WebSocketSessionHandler {
             let sticker = body["sticker"]
 
             if msg == nil && sticker == nil {
-                skip()
-
                 return
             }
 
@@ -82,8 +93,6 @@ class ChatRoomHandler: WebSocketSessionHandler {
             for (_, emember) in self.members {
                 emember.sendStringMessage(string: try! message.jsonEncodedString(), final: true, completion: {})
             }
-
-            skip()
         }
     }
 }
