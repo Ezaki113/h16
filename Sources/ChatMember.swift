@@ -1,0 +1,65 @@
+import PerfectWebSockets
+
+class ChatMember {
+    let id: Int
+    var sockets: [WebSocket?]
+    var socketId: Int = 0
+
+    var lastClose: (() -> ()) = {}
+
+    init(id: Int) {
+        self.id = id
+        self.sockets = []
+    }
+
+    func append(socket: WebSocket) -> Int
+    {
+        sockets.insert(socket, at: socketId)
+
+        let p = socketId
+
+        socketId += 1
+
+        return p
+    }
+
+    func close(socketId: Int)
+    {
+        print("Close \(socketId)")
+
+        guard let socket = sockets[socketId] else {
+            return
+        }
+
+        socket.close()
+
+        sockets[socketId] = nil
+
+        let opened = sockets.filter { $0 != nil && $0!.isConnected }
+
+        if opened.count == 0 {
+            lastClose()
+        }
+    }
+
+    func sendStringMessage(string: String, final: Bool, completion: @escaping () -> ()) {
+        sockets.filter {
+            return $0 != nil && $0!.isConnected
+        }.map {
+            print("Send to \(self.id)")
+
+            $0!.sendStringMessage(string: string, final: final, completion: completion)
+        }
+    }
+}
+
+
+extension ChatMember : Equatable {
+    public static func ==(lhs: ChatMember, rhs: ChatMember) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    public static func !=(lhs: ChatMember, rhs: ChatMember) -> Bool {
+        return lhs.id != rhs.id
+    }
+}
