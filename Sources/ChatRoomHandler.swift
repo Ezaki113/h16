@@ -28,6 +28,8 @@ class ChatRoomHandler: WebSocketSessionHandler {
     }
 
     func handleSession(request: HTTPRequest, socket: WebSocket) {
+        print(request.cookies)
+
 
         let viewerId: Int = Int(request.urlVariables["viewer_id"]!)!
 

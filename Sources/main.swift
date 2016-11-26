@@ -2,12 +2,13 @@ import PerfectLib
 import PerfectWebSockets
 import PerfectHTTP
 import PerfectHTTPServer
-import Foundation
 import CryptoSwift
 
 let server = HTTPServer()
 var routes = Routes()
 
+
+let KEY = "Rqhweg12u387jGHhasd621t"
 
 var rooms: [Int : ChatRoomHandler] = [:]
 
@@ -52,6 +53,22 @@ routes.add(method: .get, uri: "/", handler: {
 
         return
     }
+
+    let cookie = try! [
+        "userId": viewerId,
+        "name": "\(firstName) \(lastName)",
+        "photoUrl": photoUrl
+    ].jsonEncodedString()
+
+    let encryptedCookie = try! Blowfish(key: KEY.utf8.map({$0}), blockMode: .CBC, padding: PKCS7())
+            .encrypt(cookie.utf8.map({$0}))
+            .toHexString()
+
+    response.addCookie(HTTPCookie(
+        name: "session",
+        value: encryptedCookie,
+        secure: true
+    ))
 
     var room = rooms[groupId!]
 
