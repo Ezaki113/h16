@@ -36,6 +36,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
         }
 
         hash.remove(at: hash.startIndex)
+        hash = hash.replacingOccurrences(of: " ", with: "+", options: .literal, range: nil)
 
         guard
             let cipher = try? Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7()),

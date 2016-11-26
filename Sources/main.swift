@@ -91,7 +91,7 @@ routes.add(method: .get, uri: "/ws/{group_id}/**", handler: {
             return nil
         }
 
-        guard let hash = request.urlVariables[routeTrailingWildcardKey]else {
+        guard let hash = request.urlVariables[routeTrailingWildcardKey] else {
             return nil
         }
 
