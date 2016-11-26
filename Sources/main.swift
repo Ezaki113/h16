@@ -72,7 +72,7 @@ routes.add(method: .get, uri: "/", handler: {
   }
 )
 
-routes.add(method: .get, uri: "/ws/{group_id}/{hash}", handler: {
+routes.add(method: .get, uri: "/ws/{group_id}/**", handler: {
     request, response in
     
     WebSocketHandler(handlerProducer: {
@@ -82,7 +82,7 @@ routes.add(method: .get, uri: "/ws/{group_id}/{hash}", handler: {
             return nil
         }
 
-        guard let hash = Int(request.urlVariables["hash"] ?? "") else {
+        guard let hash = Int(request.urlVariables[routeTrailingWildcardKey] ?? "") else {
             return nil
         }
 
