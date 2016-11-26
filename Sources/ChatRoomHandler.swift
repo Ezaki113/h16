@@ -53,7 +53,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
         let viewerId = decrypted["userId"] as! Int
         let name = decrypted["name"] as! String
-        let photoUrl = decrypted["name"] as! String
+        let photoUrl = decrypted["photoUrl"] as! String
 
         addMemberIfNotExists(id: viewerId, name: name, photoUrl: photoUrl)
 
