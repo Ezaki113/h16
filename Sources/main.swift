@@ -66,7 +66,8 @@ routes.add(method: .get, uri: "/", handler: {
     response.addCookie(HTTPCookie(
         name: "session",
         value: encryptedCookie,
-        secure: true
+        domain: "team10.vkhackathon.ru",
+        path: "/"
     ))
 
     var room = rooms[groupId!]
