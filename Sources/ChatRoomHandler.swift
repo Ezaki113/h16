@@ -47,7 +47,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
             guard socket.isConnected else {
                 print("Reason socked.isConnected")
-                member.close(socketId: sockerId)
+                member.close(socketId: socketId)
 
                 return
             }
