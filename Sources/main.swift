@@ -9,7 +9,6 @@ var routes = Routes()
 
 
 let KEY = "Rqhweg12u387jGHhasd621t".utf8.map({$0})
-let CIPHER = try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())
 
 var rooms: [Int : ChatRoomHandler] = [:]
 
@@ -61,7 +60,7 @@ routes.add(method: .get, uri: "/", handler: {
         "photoUrl": photoUrl
     ].jsonEncodedString()
 
-    let encryptedCookie = try! CIPHER.encrypt(cookie.utf8.map({$0}))
+    let encryptedCookie = try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7()).encrypt(cookie.utf8.map({$0}))
             .toBase64()!
 
     response.addCookie(HTTPCookie(
@@ -77,21 +76,17 @@ routes.add(method: .get, uri: "/", handler: {
         rooms[groupId!] = room
     }
 
-//    let script = "var socket = new WebSocket(\"ws://\" + location.host + \"/ws/\(groupId!)/\(viewerId)\");"
-//            + "socket.onopen = function() {console.log(1); socket.send(JSON.stringify({\"sendMessage\":{\"text\":\"kokoko\"}}));};"
-//            + "socket.onmessage = function(e) {console.log(event.data)};"
-    
     response.setHeader(.contentType, value: "text/html")
 
     let body = "<!DOCTYPE html><html class=\"h\"><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\"><title></title><style>.h, .h body, .h {margin:0;padding:0;background: #FFF;height: 100%;}#root {position: relative;}</style><script src=\"//vk.com/js/api/xd_connection.js?2\"  type=\"text/javascript\"></script></head><body><div id=\"root\"></div><script type=\"text/javascript\" src=\"vendor.1480174273140.js\"></script><script type=\"text/javascript\" src=\"app.1480174273140.js\"></script></body></html>"
 
     response.appendBody(string: body)
-
-//    response.appendBody(string: "<html><head><title>Hello, world!</title></head><script>" + script + "</script><body></body></html>")
     response.completed()
   }
 )
 
+
+// viewer_id cрезать
 routes.add(method: .get, uri: "/ws/{group_id}/{viewer_id}", handler: {
     request, response in
     

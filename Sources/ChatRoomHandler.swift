@@ -49,7 +49,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
             return
         }
 
-        let decrypted = try! session!.decryptBase64ToString(cipher: CIPHER).jsonDecode() as! [String : Any]
+        let decrypted = try! session!.decryptBase64ToString(cipher: try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())).jsonDecode() as! [String : Any]
 
         let viewerId = decrypted["userId"] as! Int
         let name = decrypted["name"] as! String
