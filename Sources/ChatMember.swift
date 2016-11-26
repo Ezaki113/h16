@@ -2,14 +2,18 @@ import PerfectWebSockets
 
 class ChatMember {
     let id: Int
-    var sockets: [WebSocket?]
+    let name: String
+    let photoUrl: String
+
+    var sockets: [WebSocket?] = []
     var socketId: Int = 0
 
     var lastClose: (() -> ()) = {}
 
-    init(id: Int) {
+    init(id: Int, name: String, photoUrl: String) {
         self.id = id
-        self.sockets = []
+        self.name = name
+        self.photoUrl = photoUrl
     }
 
     func append(socket: WebSocket) -> Int

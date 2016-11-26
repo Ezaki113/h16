@@ -9,6 +9,8 @@ let server = HTTPServer()
 var routes = Routes()
 
 
+var rooms: [Int : ChatRoomHandler] = [:]
+
 routes.add(method: .get, uri: "/", handler: {
     request, response in
     
@@ -37,95 +39,43 @@ routes.add(method: .get, uri: "/", handler: {
         return
     }
 
-    let viewerId: Int? =  Int(request.param(name: "viewer_id", defaultValue: "")!)
-
-    guard viewerId != nil && viewerId! > 0 else {
+    guard let viewerId = Int(request.param(name: "viewer_id")!),
+          viewerId > 0,
+        let apiResult = request.param(name: "api_result"),
+        let decoded = try? apiResult.jsonDecode() as? [String : Any],
+        let decodedResponse = (decoded!["response"] as! [Any]).first as? [String: Any],
+        let firstName = decodedResponse["first_name"] as? String,
+        let lastName = decodedResponse["last_name"] as? String,
+        let photoUrl = decodedResponse["photo_200"] as? String else {
         response.status = .badRequest
         response.completed()
 
         return
     }
 
-    
-    guard let apiResult = request.param(name: "api_result") else {
-        response.status = .badRequest
-        response.completed()
-        
-        return
+    var room = rooms[groupId!]
+
+    if room == nil {
+        room = ChatRoomHandler(groupId: groupId!)
+        rooms[groupId!] = room
     }
-    
-    guard let decoded = try? apiResult.jsonDecode() as? [String : Any] else {
-        response.status = .badRequest
-        response.completed()
-        
-        return
-    }
-    
-    let script = "var socket = new WebSocket(\"ws://\" + location.host + \"/ws/\(groupId!)/\(viewerId!)\");"
-            + "socket.onopen = function() {console.log(1); socket.send(\"Привет\");};"
-            + "socket.onmessage = function(e) {console.log(event.data)};"
+
+    room!.addMemberIfNotExists(id: viewerId, name: "\(firstName) \(lastName)", photoUrl: photoUrl)
+
+//    let script = "var socket = new WebSocket(\"ws://\" + location.host + \"/ws/\(groupId!)/\(viewerId)\");"
+//            + "socket.onopen = function() {console.log(1); socket.send(JSON.stringify({\"sendMessage\":{\"text\":\"kokoko\"}}));};"
+//            + "socket.onmessage = function(e) {console.log(event.data)};"
     
     response.setHeader(.contentType, value: "text/html")
-    response.appendBody(string: "<html><head><title>Hello, world!</title></head><script>" + script + "</script><body></body></html>")
+
+    let body = "<!DOCTYPE html><html class=\"h\"><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\"><title></title><style>.h, .h body, .h {margin:0;padding:0;background: #FFF;height: 100%;}#root {position: relative;}</style><script src=\"//vk.com/js/api/xd_connection.js?2\"  type=\"text/javascript\"></script></head><body><div id=\"root\"></div><script type=\"text/javascript\" src=\"vendor.1480174273140.js\"></script><script type=\"text/javascript\" src=\"app.1480174273140.js\"></script></body></html>"
+
+    response.appendBody(string: body)
+
+//    response.appendBody(string: "<html><head><title>Hello, world!</title></head><script>" + script + "</script><body></body></html>")
     response.completed()
   }
 )
-
-class ChatRoomHandler: WebSocketSessionHandler {
-    let socketProtocol: String? = nil
-
-    let groupId: Int
-    var members: [Int : ChatMember] = [:]
-
-    init(groupId: Int) {
-        self.groupId = groupId
-    }
-    
-    func handleSession(request: HTTPRequest, socket: WebSocket) {
-        let viewerId: Int = Int(request.urlVariables["viewer_id"]!)!
-
-        var member = members[viewerId]
-
-        if member == nil {
-            member = ChatMember(id: viewerId)
-
-            member!.lastClose = {
-                print("last close")
-                self.members[viewerId] = nil
-            }
-            members[viewerId] = member
-        }
-
-        let socketId = member!.append(socket: socket)
-
-        work(socketId: socketId, member: member!, request: request, socket: socket)
-    }
-
-    func work(socketId: Int, member: ChatMember, request: HTTPRequest, socket: WebSocket)
-    {
-        socket.readStringMessage {
-            string, op, fin in
-
-            guard socket.isConnected, let string = string else {
-                member.close(socketId: socketId)
-
-                return
-            }
-
-            print("Read msg: \(string) op: \(op) fin: \(fin)")
-
-            for (_, emember) in self.members {
-                print(emember.sockets.count)
-
-                emember.sendStringMessage(string: string, final: true, completion: {})
-            }
-
-            self.work(socketId: socketId, member: member, request: request, socket: socket)
-        }
-    }
-}
-
-var rooms: [Int : ChatRoomHandler] = [:]
 
 routes.add(method: .get, uri: "/ws/{group_id}/{viewer_id}", handler: {
     request, response in
@@ -140,12 +90,8 @@ routes.add(method: .get, uri: "/ws/{group_id}/{viewer_id}", handler: {
         guard let viewerId = Int(request.urlVariables["viewer_id"] ?? "") else {
             return nil
         }
-        
-        let room = rooms[groupId]
-        
-        if room == nil { rooms[groupId] = ChatRoomHandler(groupId: groupId) }
-        
-        return rooms[groupId]
+
+        return rooms[groupId]!
     }).handleRequest(request: request, response: response)
     
 })
