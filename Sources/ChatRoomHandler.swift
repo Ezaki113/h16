@@ -45,13 +45,6 @@ class ChatRoomHandler: WebSocketSessionHandler {
                 self.work(socketId: socketId, member: member, request: request, socket: socket)
             }
 
-            guard socket.isConnected else {
-                print("Reason socked.isConnected")
-                member.close(socketId: socketId)
-
-                return
-            }
-
             guard let string = string else {
                 print("Reason string = string")
                 member.close(socketId: socketId)
