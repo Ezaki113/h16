@@ -68,7 +68,7 @@ routes.add(method: .get, uri: "/", handler: {
     
     response.setHeader(.contentType, value: "text/html")
 
-    let body = "<!DOCTYPE html><html class=\"h\"><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\"><title></title><style>.h, .h body, .h {margin:0;padding:0;background: #FFF;height: 100%;}#root {position: relative;}</style><script src=\"//vk.com/js/api/xd_connection.js?2\"  type=\"text/javascript\"></script></head><body><div id=\"root\"></div><script type=\"text/javascript\" src=\"vendor.1480174273140.js\"></script><script type=\"text/javascript\" src=\"app.1480174273140.js\"></script></body></html>"
+    let body = "<!DOCTYPE html><html class=\"h\"><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\"><title></title><style>.h, .h body, .h {margin:0;padding:0;background: #FFF;height: 100%;}#root {position: relative;}</style><script src=\"//vk.com/js/api/xd_connection.js?2\"  type=\"text/javascript\"></script></head><body><div id=\"root\"></div><script type=\"text/javascript\" src=\"vendor.1480184327237.js\"></script><script type=\"text/javascript\" src=\"app.1480184327237.js\"></script></body></html>"
 
     response.appendBody(string: body)
 
