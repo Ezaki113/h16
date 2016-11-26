@@ -2,18 +2,6 @@ import PerfectLib
 import PerfectWebSockets
 import PerfectHTTP
 import PerfectHTTPServer
-import CryptoSwift
-
-extension HTTPRequest {
-    func cookie(name: String) -> String? {
-        for (cookieName, value) in self.cookies {
-            if (cookieName == name) {
-                return value
-            }
-        }
-        return nil
-    }
-}
 
 class ChatRoomHandler: WebSocketSessionHandler {
     let socketProtocol: String? = nil
@@ -41,35 +29,11 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
     func handleSession(request: HTTPRequest, socket: WebSocket) {
 
-        let session = request.cookie(name: "session")
+        let viewerId: Int = Int(request.urlVariables["viewer_id"]!)!
 
-        guard session != nil else {
-            socket.close()
-
-            return
-        }
-
-        do {
-            let decrypted = try session!.decryptBase64ToString(cipher: try! Blowfish(key: KEY, blockMode: .CBC, padding: PKCS7())).jsonDecode() as! [String: Any]
-
-
-            let viewerId = decrypted["userId"] as! Int
-            let name = decrypted["name"] as! String
-            let photoUrl = decrypted["photoUrl"] as! String
-
-            addMemberIfNotExists(id: viewerId, name: name, photoUrl: photoUrl)
-
-            let member = members[viewerId]!
-            let socketId = member.append(socket: socket)
-
-
-
-            work(socketId: socketId, member: member, request: request, socket: socket)
-        } catch {
-            print(error)
-        }
-
-
+        let member = members[viewerId]!
+        let socketId = member.append(socket: socket)
+        work(socketId: socketId, member: member, request: request, socket: socket)
     }
 
     func work(socketId: Int, member: ChatMember, request: HTTPRequest, socket: WebSocket)
