@@ -41,7 +41,12 @@ let mainHandler: RequestHandler = {
     let x = try! HMAC(key: SECRET, variant: .sha256)
             .authenticate(signa.utf8.map {$0}).toHexString()
 
-    guard x == sign,
+    if (x != sign) {
+        print("Wrong sign. In some cases it related to wrong encoding of queryParams :(")
+        print("== reduces in \"\" in end of params")
+    }
+
+    guard
           let groupId =  Int(request.param(name: "group_id") ?? ""),
           let viewerId = Int(request.param(name: "viewer_id") ?? ""),
           let apiResult = request.param(name: "api_result")
@@ -80,7 +85,7 @@ let mainHandler: RequestHandler = {
         rooms[groupId] = room
     }
 
-    let jsVersion = "1480226558051"
+    let jsVersion = "1480230814971"
 
     let body = "<!DOCTYPE html><html class=\"h\"><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\"/>"
             + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\">"
