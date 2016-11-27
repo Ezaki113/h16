@@ -85,7 +85,7 @@ let mainHandler: RequestHandler = {
     let body = "<!DOCTYPE html><html class=\"h\"><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\"/>"
             + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\">"
             + "<script>window.hash = \"\(hash)\";</script>"
-            + "<title></title><style>.h, .h body, .h #root {overflow: hidden;}, .h {margin:0;padding:0;background: #FFF;height: 100%;}#root {position: relative;}</style><script src=\"//vk.com/js/api/xd_connection.js?2\"  type=\"text/javascript\"></script></head><body><div id=\"root\"></div>"
+            + "<title></title><style>#root {position: relative;}</style><script src=\"//vk.com/js/api/xd_connection.js?2\" type=\"text/javascript\"></script></head><body><div id=\"root\"></div>"
             + "<script type=\"text/javascript\" src=\"vendor.\(jsVersion).js\"></script><script type=\"text/javascript\" src=\"app.\(jsVersion).js\"></script></body></html>"
 
     response.setHeader(.contentType, value: "text/html")
