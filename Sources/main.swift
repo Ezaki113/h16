@@ -109,7 +109,6 @@ routes.add(method: .get, uri: "/reset-topic/{group_id}", handler: {
         return
     }
 
-    room.topic = nil
     room.resetTopic()
 
     response.status = .ok
