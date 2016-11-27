@@ -116,6 +116,12 @@ class ChatRoomHandler: WebSocketSessionHandler {
                 return
             }
 
+            if (body["resetTopic"] != nil) {
+                self.resetTopic()
+
+                return
+            }
+
             let msg = body["text"]
             let sticker = body["sticker"]
             let topic = member.admin ? body["topic"] : nil

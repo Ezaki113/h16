@@ -96,27 +96,6 @@ let mainHandler: RequestHandler = {
 routes.add(method: .get, uri: "/", handler: mainHandler)
 routes.add(method: .get, uri: "/mobile", handler: mainHandler)
 
-routes.add(method: .get, uri: "/reset-topic/{group_id}", handler: {
-    request, response in
-
-    guard
-        let groupId =  Int(request.param(name: "group_id") ?? ""),
-        let room = rooms[groupId]
-    else {
-        response.status = .badRequest
-        response.completed()
-
-        return
-    }
-
-    room.resetTopic()
-
-    response.status = .ok
-    response.completed()
-
-    return
-})
-
 routes.add(method: .get, uri: "/ws/{group_id}/**", handler: {
     request, response in
     
