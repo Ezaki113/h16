@@ -134,6 +134,8 @@ class ChatRoomHandler: WebSocketSessionHandler {
             let message: [String : [String : Any]]
 
             if (topic != nil) {
+                self.topic = topic
+
                 message = [
                     "topic": [
                         "text": topic!
