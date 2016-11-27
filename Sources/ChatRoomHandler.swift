@@ -82,13 +82,13 @@ class ChatRoomHandler: WebSocketSessionHandler {
     }
 
     func sendTopic(socket: WebSocket) {
-        guard let topic = topic else {
+        guard self.topic != nil else {
             return
         }
 
         let message: [String : [String : String]] = [
             "topic": [
-                "text": topic
+                "text": self.topic!
             ]
         ]
 
