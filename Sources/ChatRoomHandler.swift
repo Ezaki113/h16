@@ -68,7 +68,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
     }
 
     func resetTopic() {
-        room.topic = nil
+        self.topic = nil
 
         let message = [
             "topic": [
