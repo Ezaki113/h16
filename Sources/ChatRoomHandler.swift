@@ -67,7 +67,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
         work(socketId: socketId, member: member, request: request, socket: socket)
     }
 
-    func sendTopicAll() {
+    func resetTopic() {
         let message = [
             "topic": [
                 "text": ""
