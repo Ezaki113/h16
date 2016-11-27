@@ -10,16 +10,18 @@ class ChatRoomHandler: WebSocketSessionHandler {
     let groupId: Int
     var members: [Int : ChatMember] = [:]
 
+    var topic: String? = nil
+
     init(groupId: Int) {
         self.groupId = groupId
     }
 
-    func addMemberIfNotExists(id: Int, name: String, photoUrl: String) -> ChatMember
+    func addMemberIfNotExists(id: Int, name: String, photoUrl: String, admin: Bool) -> ChatMember
     {
         var member = members[id]
 
         if member == nil {
-            member = ChatMember(id: id, name: name, photoUrl: photoUrl)
+            member = ChatMember(id: id, name: name, photoUrl: photoUrl, admin: admin)
 
             members[id] = member
         }
@@ -43,7 +45,8 @@ class ChatRoomHandler: WebSocketSessionHandler {
             let decrypted = try? hash.decryptBase64ToString(cipher: cipher).jsonDecode() as! [String: Any],
             let viewerId = decrypted["userId"] as? Int,
             let name = decrypted["name"] as? String,
-            let photoUrl = decrypted["photoUrl"] as? String
+            let photoUrl = decrypted["photoUrl"] as? String,
+            let admin = decrypted["admin"] as? Bool
         else {
             socket.close()
 
@@ -53,12 +56,29 @@ class ChatRoomHandler: WebSocketSessionHandler {
         let member = addMemberIfNotExists(
             id: viewerId,
             name: name,
-            photoUrl: photoUrl
+            photoUrl: photoUrl,
+            admin: admin
         )
 
         let socketId = member.append(socket: socket)
 
+        sendTopic(socket: socket)
+
         work(socketId: socketId, member: member, request: request, socket: socket)
+    }
+
+    func sendTopic(socket: WebSocket) {
+        guard let topic = topic else {
+            return
+        }
+
+        let message: [String : [String : String]] = [
+            "topic": [
+                "text": topic
+            ]
+        ]
+
+        socket.sendStringMessage(string: try! message.jsonEncodedString(), final: true, completion: {})
     }
 
     func work(socketId: Int, member: ChatMember, request: HTTPRequest, socket: WebSocket)
@@ -84,20 +104,31 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
             let msg = body["text"]
             let sticker = body["sticker"]
+            let topic = member.admin ? body["topic"] : nil
 
-            if msg == nil && sticker == nil {
+            if msg == nil && sticker == nil && topic == nil {
                 return
             }
 
-            let message: [String : [String: Any]] = [
-                "message": [
-                    "userId": member.id,
-                    "userName": member.name,
-                    "userPic": member.photoUrl,
-                    "text": msg ?? "",
-                    "sticker": sticker ?? ""
+            let message: [String : [String : Any]]
+
+            if (topic != nil) {
+                message = [
+                    "topic": [
+                        "text": topic!
+                    ]
                 ]
-            ]
+            } else {
+                message = [
+                    "message": [
+                        "userId": member.id,
+                        "userName": member.name,
+                        "userPic": member.photoUrl,
+                        "text": msg ?? "",
+                        "sticker": sticker ?? ""
+                    ]
+                ]
+            }
 
             for (_, emember) in self.members {
                 emember.sendStringMessage(string: try! message.jsonEncodedString(), final: true, completion: {})

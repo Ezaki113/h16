@@ -4,14 +4,16 @@ class ChatMember {
     let id: Int
     let name: String
     let photoUrl: String
+    let admin: Bool
 
     var sockets: [WebSocket?] = []
     var socketId: Int = 0
 
-    init(id: Int, name: String, photoUrl: String) {
+    init(id: Int, name: String, photoUrl: String, admin: Bool) {
         self.id = id
         self.name = name
         self.photoUrl = photoUrl
+        self.admin = admin
     }
 
     func append(socket: WebSocket) -> Int
