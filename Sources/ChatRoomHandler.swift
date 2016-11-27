@@ -67,6 +67,18 @@ class ChatRoomHandler: WebSocketSessionHandler {
         work(socketId: socketId, member: member, request: request, socket: socket)
     }
 
+    func sendTopicAll() {
+        let message = [
+            "topic": [
+                "text": ""
+            ]
+        ]
+
+        for (_, emember) in self.members {
+            emember.sendStringMessage(string: try! message.jsonEncodedString(), final: true, completion: {})
+        }
+    }
+
     func sendTopic(socket: WebSocket) {
         guard let topic = topic else {
             return
