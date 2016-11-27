@@ -80,7 +80,7 @@ let mainHandler: RequestHandler = {
         rooms[groupId] = room
     }
 
-    let jsVersion = "1480196366688"
+    let jsVersion = "1480226019917"
 
     let body = "<!DOCTYPE html><html class=\"h\"><head><meta http-equiv=\"Content-type\" content=\"text/html; charset=utf-8\"/>"
             + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no\">"
