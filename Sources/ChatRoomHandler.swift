@@ -31,7 +31,7 @@ class ChatRoomHandler: WebSocketSessionHandler {
 
     func handleSession(request: HTTPRequest, socket: WebSocket) {
         guard
-            var hash = request.urlVariables[routeTrailingWildcardKey] else {
+            var hash = request.urlVariables[routeTrailingWildcardKey]?.replacingOccurrences(of: " ", with: "+") else {
             socket.close()
 
             return
